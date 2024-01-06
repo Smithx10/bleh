@@ -1,0 +1,127 @@
+package main
+
+import (
+	"fmt"
+	"strconv"
+)
+
+templ Layout() {
+	<!DOCTYPE html>
+	<html lang="en">
+		<head>
+			<script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
+			<script src="https://cdn.tailwindcss.com"></script>
+			<script src="https://unpkg.com/htmx.org@1.9.5" integrity="sha384-xcuj3WpfgjlKF+FXhSQFQ0ZNr39ln+hwjN3npfM9VBnUskLolQAcN80McRIVOPuO" crossorigin="anonymous"></script>
+		</head>
+		<body>
+			@testComponent()
+		</body>
+	</html>
+}
+
+templ Workflows(i []Workflow) {
+	<ul class="flex flex-col">
+		for _, wf := range i {
+			<li>
+				ID: { strconv.Itoa(wf.Id) }
+			</li>
+			<li>
+				Name: { wf.Name }
+			</li>
+			<li>
+				Completion: { strconv.FormatBool(wf.Completion) }
+			</li>
+		}
+	</ul>
+}
+
+templ templateArchive(i Archive) {
+	{ fmt.Sprintf("%s\n%s\n%s\n", i.Name, strconv.Itoa(i.Id), i.Creation) }
+}
+
+templ Schedules(i []Schedule) {
+	<ul>
+		for _, s := range i {
+			<li>{ fmt.Sprintf("%d-%s\n", s.Id, s.Name) }</li>
+		}
+	</ul>
+}
+
+templ listItem(s string) {
+	<li
+		class="border flex gap-2"
+		hx-get={ fmt.Sprintf("/%s", s) }
+		hx-target="#workspace"
+		hx-trigger="click"
+		hx-swap="innerHTML"
+	>
+		<div>
+			[]
+		</div>
+		<div class="group-[.foo]:invisible">
+			{ s }
+		</div>
+	</li>
+}
+
+templ testComponent () {
+	<div class="flex h-screen w-screen gap ">
+		<div id="cool" class="flex group">
+			<div id="cool" class="flex flex-col border w-[160px] group-[.foo]:w-[76px]">
+				<div id="1a" class="flex flex-col px-2 py-2 h-[128px]">
+					[ logo ] 
+					<div
+						id="chevron"
+						class="self-end px-2 py-2"
+						hx-on:click="console.log('waaaat'); htmx.toggleClass(htmx.find('#cool'), 'foo')"
+					>
+						">"
+					</div>
+				</div>
+				<div id="1b" class="flex flex-auto flex-col">
+					<div id="1b1" class="flex flex-col">
+						<ul>
+							for _, item := range []string{"workflows", "schedules", "archive"} {
+								@listItem(item)
+							}
+							<hr class="w-full my-8 stroke-gray-700"/>
+							@listItem("namespaces")
+						</ul>
+					</div>
+					<div id="1b2" class="flex flex-col mt-auto border">
+						<div id="1b2a" class="">
+							<ul>
+								for _, item := range []string{"import", "feedback", "labs off"} {
+									@listItem(item)
+								}
+							</ul>
+						</div>
+					</div>
+				</div>
+				<div id="1c" class="flex py-6 items-end justify-center h-[160px]">
+					2.18.1
+				</div>
+			</div>
+		</div>
+		<div class="flex flex-col  w-full">
+			<div id="2" class="flex justify-end border h-[50px]">
+				<div id="2a" class="flex border h-[50px] w-[100px] gap-4 items-center justify-center mr-10">
+					<div id="s-svg" class="border">
+						[ S ] 
+					</div>
+					<div id="downbutton" class="border">
+						x
+					</div>
+				</div>
+			</div>
+			<div id="3" class="border flex flex-col gap-4 h-4/5 w-full py-10 px-10">
+				<div id="title" class="border py-2">
+					Hello User: { GetUser(ctx).Name }
+				</div>
+				<div id="workspace" class="border h-[calc(100vh-238px)] w-full">
+					Work Space
+				</div>
+			</div>
+		</div>
+	</div>
+}
